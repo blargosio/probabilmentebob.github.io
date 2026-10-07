@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color" content="#050510">
+
+<title>RANDOM GAME MACHINE</title>
+
+<style>
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+:root {
+    --pink: #ff008c;
+    --cyan: #00eaff;
+    --purple: #8c00ff;
+    --orange: #ff5c00;
+    --yellow: #ffe600;
+    --green: #00ff88;
+
+    --bg: #05050d;
+    --glass: rgba(255,255,255,.055);
+    --border: rgba(255,255,255,.13);
+}
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    color: white;
+
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            #21113a 0%,
+            #0d0820 30%,
+            #05050d 70%,
+            #020207 100%
+        );
+}
+
+/* =========================================================
+   BACKGROUND AURORA
+========================================================= */
+
+.background {
+    position: fixed;
+    inset: -70%;
+
+    background:
+        conic-gradient(
+            from 0deg,
+
+            rgba(255,0,140,.18),
+            transparent 12%,
+
+            rgba(0,234,255,.16),
+            transparent 25%,
+
+            rgba(140,0,255,.18),
+            transparent 38%,
+
+            rgba(255,92,0,.15),
+            transparent 52%,
+
+            rgba(0,255,136,.12),
+            transparent 67%,
+
+            rgba(255,230,0,.1),
+            transparent 80%,
+
+            rgba(255,0,140,.18)
+        );
+
+    filter: blur(100px);
+
+    animation:
+        backgroundSpin 28s linear infinite;
+
+    pointer-events: none;
+}
+
+.aurora {
+    position: fixed;
+    inset: 0;
+
+    background:
+        radial-gradient(
+            ellipse at 15% 20%,
+            rgba(255,0,140,.16),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            ellipse at 85% 20%,
+            rgba(0,234,255,.13),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            ellipse at 80% 85%,
+            rgba(140,0,255,.15),
+            transparent 35%
+        ),
+
+        radial-gradient(
+            ellipse at 15% 85%,
+            rgba(255,92,0,.1),
+            transparent 35%
+        );
+
+    filter: blur(35px);
+
+    animation:
+        auroraMove 10s ease-in-out infinite alternate;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.grid {
+    position: fixed;
+    inset: -30%;
+
+    opacity: .12;
+
+    background-image:
+
+        linear-gradient(
+            rgba(255,255,255,.18) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.18) 1px,
+            transparent 1px
+        );
+
+    background-size: 55px 55px;
+
+    transform:
+        perspective(600px)
+        rotateX(58deg)
+        scale(1.5);
+
+    transform-origin: center bottom;
+
+    mask-image:
+        linear-gradient(
+            to top,
+            black,
+            transparent 85%
+        );
+
+    animation:
+        gridMove 6s linear infinite;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   STARS
+========================================================= */
+
+.stars {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+}
+
+.star {
+    position: absolute;
+
+    width: 2px;
+    height: 2px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    box-shadow:
+        0 0 8px white;
+
+    animation:
+        twinkle var(--duration)
+        ease-in-out infinite;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
+    position: fixed;
+
+    top: 22px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width:
+        min(
+            900px,
+            calc(100% - 30px)
+        );
+
+    padding:
+        12px 16px;
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items: center;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        999px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.09),
+            rgba(255,255,255,.025)
+        );
+
+    backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.35),
+
+        inset 0 1px
+        rgba(255,255,255,.1);
+
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: .25em;
+
+    text-transform:
+        uppercase;
+}
+
+.logo-dot {
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        var(--green);
+
+    box-shadow:
+        0 0 8px var(--green),
+        0 0 20px var(--green);
+
+    animation:
+        pulse 1.5s infinite;
+}
+
+.online {
+    color:
+        rgba(255,255,255,.45);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing:
+        .15em;
+
+    text-transform:
+        uppercase;
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
+    position: relative;
+
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    z-index: 20;
+}
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.title {
+    position: absolute;
+
+    top: 16%;
+
+    text-align:
+        center;
+
+    pointer-events: none;
+}
+
+.kicker {
+    margin-bottom: 12px;
+
+    color:
+        var(--cyan);
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing:
+        .5em;
+
+    text-transform:
+        uppercase;
+
+    text-shadow:
+        0 0 18px
+        rgba(0,234,255,.8);
+}
+
+h1 {
+    margin: 0;
+
+    font-size:
+        clamp(
+            40px,
+            8vw,
+            88px
+        );
+
+    line-height:
+        .85;
+
+    font-weight:
+        1000;
+
+    letter-spacing:
+        -.07em;
+
+    background:
+        linear-gradient(
+            100deg,
+
+            white,
+            var(--cyan),
+            var(--pink),
+            white
+        );
+
+    background-size:
+        300% auto;
+
+    -webkit-background-clip:
+        text;
+
+    background-clip:
+        text;
+
+    color:
+        transparent;
+
+    animation:
+        titleGradient
+        5s linear infinite;
+
+    filter:
+        drop-shadow(
+            0 0 30px
+            rgba(255,0,140,.18)
+        );
+}
+
+.subtitle {
+    margin-top: 18px;
+
+    color:
+        rgba(255,255,255,.42);
+
+    font-size:
+        11px;
+
+    letter-spacing:
+        .2em;
+
+    text-transform:
+        uppercase;
+}
+
+/* =========================================================
+   RANDOM MACHINE
+========================================================= */
+
+.machine {
+    position: relative;
+
+    width:
+        min(
+            440px,
+            85vw
+        );
+
+    padding:
+        45px 35px 35px;
+
+    border-radius:
+        30px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.13);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.085),
+            rgba(255,255,255,.025)
+        );
+
+    backdrop-filter:
+        blur(25px);
+
+    box-shadow:
+
+        0 35px 100px
+        rgba(0,0,0,.55),
+
+        inset 0 1px
+        rgba(255,255,255,.1);
+
+    text-align:
+        center;
+
+    transform:
+        translateY(20px);
+
+    animation:
+        machineFloat
+        5s ease-in-out infinite;
+}
+
+/* glowing border */
+
+.machine::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -1px;
+
+    border-radius:
+        inherit;
+
+    padding: 1px;
+
+    background:
+        linear-gradient(
+            120deg,
+            var(--pink),
+            transparent 25%,
+            var(--cyan),
+            transparent 60%,
+            var(--purple)
+        );
+
+    -webkit-mask:
+        linear-gradient(#000 0 0)
+        content-box,
+        linear-gradient(#000 0 0);
+
+    -webkit-mask-composite:
+        xor;
+
+    mask-composite:
+        exclude;
+
+    opacity: .5;
+
+    pointer-events: none;
+}
+
+/* =========================================================
+   RANDOM NUMBER
+========================================================= */
+
+.number {
+    font-family:
+        "Arial Black",
+        Arial,
+        sans-serif;
+
+    font-size:
+        12px;
+
+    font-weight:
+        900;
+
+    color:
+        rgba(255,255,255,.3);
+
+    letter-spacing:
+        .25em;
+
+    margin-bottom:
+        12px;
+}
+
+/* =========================================================
+   GAME DISPLAY
+========================================================= */
+
+.display {
+    position: relative;
+
+    margin:
+        0 auto 28px;
+
+    min-height:
+        100px;
+
+    display:
+        flex;
+
+    justify-content:
+        center;
+
+    align-items:
+        center;
+
+    flex-direction:
+        column;
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(0,0,0,.28);
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    box-shadow:
+        inset 0 0 30px
+        rgba(0,0,0,.4);
+}
+
+.display-label {
+    color:
+        rgba(255,255,255,.3);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        .25em;
+
+    text-transform:
+        uppercase;
+}
+
+.game-name {
+    margin-top:
+        8px;
+
+    font-size:
+        clamp(
+            20px,
+            5vw,
+            32px
+        );
+
+    font-weight:
+        1000;
+
+    letter-spacing:
+        -.03em;
+
+    color:
+        white;
+
+    text-shadow:
+        0 0 20px
+        rgba(0,234,255,.3);
+}
+
+/* =========================================================
+   MAIN BUTTON
+========================================================= */
+
+.game-button {
+    position: relative;
+
+    width: 100%;
+
+    padding:
+        20px 25px;
+
+    border: none;
+
+    border-radius:
+        16px;
+
+    cursor: pointer;
+
+    color:
+        white;
+
+    background:
+        linear-gradient(
+            110deg,
+            var(--pink),
+            var(--purple),
+            var(--cyan)
+        );
+
+    background-size:
+        200% 100%;
+
+    font-size:
+        15px;
+
+    font-weight:
+        1000;
+
+    letter-spacing:
+        .1em;
+
+    text-transform:
+        uppercase;
+
+    box-shadow:
+        0 12px 35px
+        rgba(255,0,140,.3),
+
+        inset 0 1px
+        rgba(255,255,255,.3);
+
+    transition:
+        transform .2s,
+        box-shadow .2s,
+        background-position .5s;
+
+    animation:
+        buttonGlow
+        2.5s ease-in-out infinite;
+}
+
+.game-button:hover {
+    transform:
+        translateY(-4px)
+        scale(1.02);
+
+    background-position:
+        100% 0;
+
+    box-shadow:
+        0 18px 50px
+        rgba(0,234,255,.3),
+
+        0 0 30px
+        rgba(255,0,140,.25);
+}
+
+.game-button:active {
+    transform:
+        scale(.96);
+}
+
+.button-small {
+    display: block;
+
+    margin-top:
+        7px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    opacity:
+        .55;
+
+    letter-spacing:
+        .2em;
+}
+
+/* =========================================================
+   BLARGOCIAO
+========================================================= */
+
+.blargociao {
+    position: fixed;
+
+    z-index: 5;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        var(--size);
+
+    height:
+        var(--size);
+
+    border-radius:
+        50%;
+
+    color:
+        white;
+
+    font-family:
+        Impact,
+        "Arial Black",
+        sans-serif;
+
+    font-size:
+        calc(
+            var(--size) / 5
+        );
+
+    font-weight:
+        900;
+
+    text-shadow:
+        2px 2px 0 #000;
+
+    background:
+        var(--color);
+
+    border:
+        1px solid
+        rgba(255,255,255,.5);
+
+    box-shadow:
+        0 0 15px
+        var(--color),
+
+        inset 0 0 12px
+        rgba(255,255,255,.2);
+
+    user-select:
+        none;
+
+    pointer-events:
+        none;
+
+    animation:
+        fly
+        var(--duration)
+        linear infinite;
+}
+
+/* =========================================================
+   PARTICLE BURST
+========================================================= */
+
+.particle {
+    position: fixed;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    pointer-events:
+        none;
+
+    z-index:
+        200;
+
+    background:
+        var(--color);
+
+    box-shadow:
+        0 0 12px
+        var(--color);
+
+    animation:
+        particleFly
+        .9s ease-out
+        forwards;
+}
+
+/* =========================================================
+   FLASH
+========================================================= */
+
+.flash {
+    position: fixed;
+
+    inset: 0;
+
+    z-index:
+        190;
+
+    pointer-events:
+        none;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(255,255,255,.9),
+            rgba(0,234,255,.25) 25%,
+            transparent 60%
+        );
+
+    opacity:
+        0;
+}
+
+.flash.active {
+    animation:
+        flash .6s ease-out;
+}
+
+/* =========================================================
+   SCANLINES
+========================================================= */
+
+.scanlines {
+    position: fixed;
+
+    inset: 0;
+
+    z-index:
+        150;
+
+    pointer-events:
+        none;
+
+    opacity:
+        .035;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0,
+            transparent 3px,
+            white 4px
+        );
+}
+
+/* =========================================================
+   VIGNETTE
+========================================================= */
+
+.vignette {
+    position: fixed;
+
+    inset: 0;
+
+    z-index:
+        160;
+
+    pointer-events:
+        none;
+
+    box-shadow:
+        inset 0 0 180px
+        rgba(0,0,0,.95),
+
+        inset 0 0 60px
+        rgba(0,0,0,.7);
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes backgroundSpin {
+    to {
+        transform:
+            rotate(360deg);
+    }
+}
+
+@keyframes auroraMove {
+    from {
+        transform:
+            scale(1)
+            rotate(0deg);
+    }
+
+    to {
+        transform:
+            scale(1.12)
+            rotate(12deg);
+    }
+}
+
+@keyframes gridMove {
+    to {
+        background-position:
+            0 55px,
+            55px 0;
+    }
+}
+
+@keyframes twinkle {
+
+    0%, 100% {
+        opacity: .1;
+        transform:
+            scale(.5);
+    }
+
+    50% {
+        opacity: 1;
+        transform:
+            scale(1.5);
+    }
+}
+
+@keyframes pulse {
+
+    0%, 100% {
+        transform:
+            scale(1);
+    }
+
+    50% {
+        transform:
+            scale(1.4);
+    }
+}
+
+@keyframes titleGradient {
+
+    to {
+        background-position:
+            300% center;
+    }
+}
+
+@keyframes machineFloat {
+
+    0%, 100% {
+        transform:
+            translateY(20px);
+    }
+
+    50% {
+        transform:
+            translateY(10px);
+    }
+}
+
+@keyframes buttonGlow {
+
+    0%, 100% {
+        box-shadow:
+            0 12px 35px
+            rgba(255,0,140,.25);
+    }
+
+    50% {
+        box-shadow:
+            0 15px 45px
+            rgba(0,234,255,.25);
+    }
+}
+
+@keyframes fly {
+
+    0% {
+        transform:
+            translate(
+                var(--x1),
+                var(--y1)
+            )
+            rotate(0deg)
+            scale(.65);
+
+        opacity:
+            0;
+    }
+
+    15% {
+        opacity:
+            .7;
+    }
+
+    50% {
+        transform:
+            translate(
+                var(--x2),
+                var(--y2)
+            )
+            rotate(180deg)
+            scale(1.15);
+
+        opacity:
+            .8;
+    }
+
+    85% {
+        opacity:
+            .7;
+    }
+
+    100% {
+        transform:
+            translate(
+                var(--x3),
+                var(--y3)
+            )
+            rotate(360deg)
+            scale(.65);
+
+        opacity:
+            0;
+    }
+}
+
+@keyframes particleFly {
+
+    from {
+        transform:
+            translate(0,0)
+            scale(1);
+
+        opacity:
+            1;
+    }
+
+    to {
+        transform:
+            translate(
+                var(--dx),
+                var(--dy)
+            )
+            scale(0);
+
+        opacity:
+            0;
+    }
+}
+
+@keyframes flash {
+
+    0% {
+        opacity:
+            0;
+    }
+
+    15% {
+        opacity:
+            .9;
+    }
+
+    100% {
+        opacity:
+            0;
+    }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .online {
+        display:
+            none;
+    }
+
+    .title {
+        top:
+            17%;
+    }
+
+    .subtitle {
+        max-width:
+            280px;
+
+        margin-left:
+            auto;
+
+        margin-right:
+            auto;
+
+        line-height:
+            1.6;
+    }
+
+    .machine {
+        padding:
+            35px 22px 25px;
+
+        width:
+            calc(
+                100vw - 40px
+            );
+    }
+
+    .game-button {
+        padding:
+            18px;
+    }
+
+    .blargociao {
+        opacity:
+            .45;
+    }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration:
+            .001ms !important;
+
+        animation-iteration-count:
+            1 !important;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- =======================================================
+     BACKGROUND
+======================================================= -->
+
+<div class="background"></div>
+<div class="aurora"></div>
+<div class="grid"></div>
+
+<div
+    class="stars"
+    id="stars"
+></div>
+
+<!-- =======================================================
+     HEADER
+======================================================= -->
+
+<header class="topbar">
+
+    <div class="logo">
+
+        <span class="logo-dot"></span>
+
+        RANDOM GAME MACHINE
+
+    </div>
+
+    <div class="online">
+
+        SYSTEM ONLINE // RNG READY
+
+    </div>
+
+</header>
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
+<main class="main">
+
+    <section class="title">
+
+        <div class="kicker">
+            highly advanced technology
+        </div>
+
+        <h1>
+            RANDOM<br>
+            GAME
+        </h1>
+
+        <div class="subtitle">
+            non sai cosa giocare? lascia decidere al destino.
+        </div>
+
+    </section>
+
+    <!-- MACHINE -->
+
+    <section class="machine">
+
+        <div class="number">
+            MACHINE #000001
+        </div>
+
+        <div class="display">
+
+            <div class="display-label">
+                destinazione selezionata
+            </div>
+
+            <div
+                class="game-name"
+                id="gameName"
+            >
+                ???
+            </div>
+
+        </div>
+
+        <button
+            class="game-button"
+            id="gameButton"
+            type="button"
+        >
+
+            🎲
+            GIOCA A CASO
+
+            <span class="button-small">
+                premi e accetta il destino
+            </span>
+
+        </button>
+
+    </section>
+
+</main>
+
+<!-- =======================================================
+     EFFECTS
+======================================================= -->
+
+<div
+    class="flash"
+    id="flash"
+></div>
+
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<script>
+
+/* =========================================================
+   GAMES
+========================================================= */
+
+const giochi = [
+
+    {
+        nome: "Eaglercraft",
+        url: "https://eaglercraft.com"
+    },
+
+    {
+        nome: "Krunker",
+        url: "https://krunker.io"
+    },
+
+    {
+        nome: "Free Pac-Man",
+        url: "https://www.freepacman.org"
+    },
+
+    {
+        nome: "Slither.io",
+        url: "https://slither.io"
+    },
+    
+    {
+        nome: "Fanculo",
+        url: "https://vaffanculo.com"
+    }
+
+];
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const button =
+    document.getElementById(
+        "gameButton"
+    );
+
+const gameName =
+    document.getElementById(
+        "gameName"
+    );
+
+const flash =
+    document.getElementById(
+        "flash"
+    );
+
+/* =========================================================
+   RANDOM GAME
+========================================================= */
+
+let locked = false;
+
+function vaiAGioco() {
+
+    if (locked)
+        return;
+
+    locked = true;
+
+    const scelta =
+        giochi[
+            Math.floor(
+                Math.random() *
+                giochi.length
+            )
+        ];
+
+    /* ---------------------------------
+       ROLLING ANIMATION
+    --------------------------------- */
+
+    let ticks = 0;
+
+    const roll =
+        setInterval(() => {
+
+            const random =
+                giochi[
+                    Math.floor(
+                        Math.random() *
+                        giochi.length
+                    )
+                ];
+
+            gameName.textContent =
+                random.nome;
+
+            ticks++;
+
+            if (ticks >= 12) {
+
+                clearInterval(roll);
+
+                gameName.textContent =
+                    scelta.nome;
+
+                esplosione();
+
+                setTimeout(() => {
+
+                    window.location.href =
+                        scelta.url;
+
+                }, 800);
+            }
+
+        }, 80);
+}
+
+/* =========================================================
+   PARTICLE EXPLOSION
+========================================================= */
+
+function esplosione() {
+
+    flash.classList.remove(
+        "active"
+    );
+
+    void flash.offsetWidth;
+
+    flash.classList.add(
+        "active"
+    );
+
+    const colors = [
+        "#ff008c",
+        "#00eaff",
+        "#8c00ff",
+        "#ffe600",
+        "#00ff88",
+        "#ff5c00"
+    ];
+
+    const centerX =
+        window.innerWidth / 2;
+
+    const centerY =
+        window.innerHeight / 2;
+
+    for (
+        let i = 0;
+        i < 55;
+        i++
+    ) {
+
+        const particle =
+            document.createElement(
+                "div"
+            );
+
+        particle.className =
+            "particle";
+
+        const angle =
+            Math.random() *
+            Math.PI *
+            2;
+
+        const distance =
+            150 +
+            Math.random() *
+            500;
+
+        particle.style.left =
+            centerX + "px";
+
+        particle.style.top =
+            centerY + "px";
+
+        particle.style.setProperty(
+            "--dx",
+            Math.cos(angle) *
+            distance +
+            "px"
+        );
+
+        particle.style.setProperty(
+            "--dy",
+            Math.sin(angle) *
+            distance +
+            "px"
+        );
+
+        particle.style.setProperty(
+            "--color",
+            colors[
+                Math.floor(
+                    Math.random() *
+                    colors.length
+                )
+            ]
+        );
+
+        document.body.appendChild(
+            particle
+        );
+
+        setTimeout(() => {
+            particle.remove();
+        }, 1000);
+    }
+}
+
+/* =========================================================
+   BUTTON
+========================================================= */
+
+button.addEventListener(
+    "click",
+    vaiAGioco
+);
+
+/* =========================================================
+   STARFIELD
+========================================================= */
+
+const stars =
+    document.getElementById(
+        "stars"
+    );
+
+for (
+    let i = 0;
+    i < 100;
+    i++
+) {
+
+    const star =
+        document.createElement(
+            "span"
+        );
+
+    star.className =
+        "star";
+
+    star.style.left =
+        Math.random() *
+        100 +
+        "%";
+
+    star.style.top =
+        Math.random() *
+        100 +
+        "%";
+
+    const size =
+        1 +
+        Math.random() *
+        2;
+
+    star.style.width =
+        size + "px";
+
+    star.style.height =
+        size + "px";
+
+    const duration =
+        1.5 +
+        Math.random() *
+        4;
+
+    star.style.setProperty(
+        "--duration",
+        duration + "s"
+    );
+
+    star.style.animationDelay =
+        -(Math.random() *
+            duration) +
+        "s";
+
+    stars.appendChild(
+        star
+    );
+}
+
+/* =========================================================
+   BLARGOCIAO
+========================================================= */
+
+const colors = [
+
+    "#ff008c",
+    "#00eaff",
+    "#8c00ff",
+    "#ff5c00",
+    "#ffe600",
+    "#00ff88"
+
+];
+
+const amount =
+    window.innerWidth < 600
+        ? 10
+        : 22;
+
+for (
+    let i = 0;
+    i < amount;
+    i++
+) {
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+    element.className =
+        "blargociao";
+
+    element.textContent =
+        "blargociao";
+
+    const size =
+        35 +
+        Math.random() *
+        70;
+
+    const color =
+        colors[
+            Math.floor(
+                Math.random() *
+                colors.length
+            )
+        ];
+
+    element.style.setProperty(
+        "--size",
+        size + "px"
+    );
+
+    element.style.setProperty(
+        "--color",
+        color
+    );
+
+    element.style.setProperty(
+        "--x1",
+        Math.random() *
+        window.innerWidth +
+        "px"
+    );
+
+    element.style.setProperty(
+        "--y1",
+        Math.random() *
+        window.innerHeight +
+        "px"
+    );
+
+    element.style.setProperty(
+        "--x2",
+        Math.random() *
+        window.innerWidth +
+        "px"
+    );
+
+    element.style.setProperty(
+        "--y2",
+        Math.random() *
+        window.innerHeight +
+        "px"
+    );
+
+    element.style.setProperty(
+        "--x3",
+        Math.random() *
+        window.innerWidth +
+        "px"
+    );
+
+    element.style.setProperty(
+        "--y3",
+        Math.random() *
+        window.innerHeight +
+        "px"
+    );
+
+    const duration =
+        5 +
+        Math.random() *
+        10;
+
+    element.style.setProperty(
+        "--duration",
+        duration + "s"
+    );
+
+    element.style.animationDelay =
+        -(Math.random() *
+            duration) +
+        "s";
+
+    document.body.appendChild(
+        element
+    );
+}
+
+/* =========================================================
+   KEYBOARD SUPPORT
+========================================================= */
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter" ||
+            event.key === " "
+        ) {
+
+            event.preventDefault();
+
+            vaiAGioco();
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>
