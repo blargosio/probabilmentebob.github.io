@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090909">
+    <title>Scacco Matto Pazzo Blargo</title>
+
+    <style>
+        :root {
+            --dark: #080808;
+            --black: #111;
+            --white: #f0f0f0;
+            --brown: #69401f;
+            --red: #ff003c;
+            --yellow: #ffe600;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            position: relative;
+            overflow: hidden;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    #303030 0%,
+                    #151515 45%,
+                    #050505 100%
+                );
+
+            font-family:
+                Impact,
+                Haettenschweiler,
+                "Arial Black",
+                sans-serif;
+
+            transition:
+                transform 0.12s ease;
+        }
+
+        /* BACKGROUND */
+
+        .background-glow {
+            position: absolute;
+            inset: -30%;
+
+            background:
+                conic-gradient(
+                    from 0deg,
+                    rgba(255, 0, 60, 0.08),
+                    transparent 15%,
+                    rgba(155, 0, 255, 0.08),
+                    transparent 35%,
+                    rgba(0, 217, 255, 0.07),
+                    transparent 55%,
+                    rgba(255, 230, 0, 0.06),
+                    transparent 75%,
+                    rgba(255, 0, 60, 0.08)
+                );
+
+            filter: blur(80px);
+
+            animation:
+                backgroundSpin 18s linear infinite;
+
+            pointer-events: none;
+        }
+
+        .scanlines {
+            position: absolute;
+            inset: 0;
+            z-index: 20;
+
+            pointer-events: none;
+            opacity: 0.08;
+
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    transparent 0px,
+                    transparent 3px,
+                    rgba(255,255,255,0.35) 4px
+                );
+        }
+
+        .vignette {
+            position: absolute;
+            inset: 0;
+            z-index: 21;
+
+            pointer-events: none;
+
+            box-shadow:
+                inset 0 0 180px #000,
+                inset 0 0 60px rgba(0,0,0,0.8);
+        }
+
+        /* BOARD */
+
+        .board-container {
+            position: relative;
+            z-index: 5;
+
+            width: min(92vh, 92vw);
+            height: min(92vh, 92vw);
+
+            transform:
+                perspective(1200px)
+                rotateX(3deg);
+
+            animation:
+                boardFloat 5s ease-in-out infinite;
+
+            filter:
+                drop-shadow(
+                    0 35px 45px rgba(0,0,0,0.65)
+                );
+        }
+
+        .board-frame {
+            position: absolute;
+            inset: -16px;
+
+            border: 4px solid #333;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #444,
+                    #111,
+                    #333
+                );
+
+            box-shadow:
+                inset 0 0 0 3px #000,
+                0 0 0 2px #000,
+                0 0 45px rgba(255,0,60,0.12);
+        }
+
+        .board {
+            position: absolute;
+            inset: 0;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(8, 1fr);
+
+            grid-template-rows:
+                repeat(8, 1fr);
+
+            overflow: hidden;
+
+            border: 5px solid #050505;
+        }
+
+        /* SQUARES */
+
+        .square {
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+
+            transition:
+                filter 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        .white {
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #d7d7d7
+                );
+        }
+
+        .black {
+            background:
+                linear-gradient(
+                    135deg,
+                    #191919,
+                    #050505
+                );
+        }
+
+        .square::after {
+            content: "";
+
+            position: absolute;
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255,255,255,0.12),
+                    transparent 40%,
+                    rgba(0,0,0,0.15)
+                );
+
+            pointer-events: none;
+        }
+
+        .square:hover {
+            filter: brightness(1.18);
+        }
+
+        /*
+         * SUBTLE SPECIAL SQUARE
+         *
+         * No skull.
+         * No glow.
+         * No animation.
+         * No obvious border.
+         *
+         * It simply looks like a slightly
+         * unusual brown chessboard square.
+         */
+
+        .special {
+            background:
+                linear-gradient(
+                    135deg,
+                    #76502d,
+                    #5d381b
+                );
+
+            cursor: pointer;
+        }
+
+        .special::after {
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(255,255,255,0.08),
+                    transparent 45%,
+                    rgba(0,0,0,0.14)
+                );
+        }
+
+        .special:hover {
+            filter: brightness(1.12);
+        }
+
+        /* CHESS PIECES */
+
+        .piece {
+            position: absolute;
+
+            z-index: 2;
+
+            font-family:
+                "Times New Roman",
+                serif;
+
+            font-size:
+                clamp(25px, 5vw, 65px);
+
+            line-height: 1;
+
+            opacity: 0.16;
+
+            pointer-events: none;
+
+            text-shadow:
+                3px 3px 0 rgba(0,0,0,0.5);
+
+            animation:
+                pieceFloat 4s ease-in-out infinite;
+        }
+
+        .white-piece {
+            color: white;
+        }
+
+        .black-piece {
+            color: #000;
+        }
+
+        .piece-1 {
+            top: 4%;
+            left: 4%;
+        }
+
+        .piece-2 {
+            top: 7%;
+            right: 5%;
+            animation-delay: -1s;
+        }
+
+        .piece-3 {
+            bottom: 4%;
+            left: 7%;
+            animation-delay: -2s;
+        }
+
+        .piece-4 {
+            right: 7%;
+            bottom: 5%;
+            animation-delay: -3s;
+        }
+
+        /* MAIN TEXT */
+
+        .text-wrapper {
+            position: absolute;
+
+            z-index: 15;
+
+            top: 50%;
+            left: 50%;
+
+            transform:
+                translate(-50%, -50%);
+
+            width: 100%;
+
+            pointer-events: none;
+
+            text-align: center;
+        }
+
+        .text {
+            margin: 0;
+
+            color: var(--red);
+
+            font-size:
+                clamp(38px, 7vw, 105px);
+
+            line-height: 0.85;
+
+            letter-spacing: -0.04em;
+
+            text-align: center;
+
+            -webkit-text-stroke:
+                3px #000;
+
+            text-shadow:
+                5px 5px 0 #000,
+                -5px -5px 0 #000,
+                5px -5px 0 #000,
+                -5px 5px 0 #000,
+                0 0 25px rgba(255,0,60,0.8),
+                0 0 60px rgba(255,0,60,0.35);
+
+            animation:
+                madness 2.8s infinite ease-in-out;
+        }
+
+        .text .yellow {
+            color: var(--yellow);
+
+            animation:
+                colorChaos 1.2s infinite alternate;
+        }
+
+        .text .white {
+            color: white;
+        }
+
+        /* SUBTITLE */
+
+        .subtitle {
+            position: absolute;
+
+            top:
+                calc(50% + min(22vw, 180px));
+
+            left: 50%;
+
+            z-index: 16;
+
+            transform:
+                translateX(-50%);
+
+            color: white;
+
+            font-family: Arial, sans-serif;
+
+            font-size:
+                clamp(9px, 1.2vw, 15px);
+
+            font-weight: 900;
+
+            letter-spacing: 5px;
+
+            text-transform: uppercase;
+
+            white-space: nowrap;
+
+            opacity: 0.45;
+
+            text-shadow:
+                0 2px 4px #000;
+
+            animation:
+                subtitleBlink 2s infinite;
+        }
+
+        /* PARTICLES */
+
+        .particle {
+            position: absolute;
+
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: var(--red);
+
+            box-shadow:
+                0 0 10px currentColor;
+
+            pointer-events: none;
+
+            animation:
+                particleFloat linear infinite;
+        }
+
+        .particle:nth-child(1) {
+            left: 10%;
+            top: 80%;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(2) {
+            left: 20%;
+            top: 20%;
+            animation-duration: 9s;
+            background: var(--yellow);
+        }
+
+        .particle:nth-child(3) {
+            left: 80%;
+            top: 30%;
+            animation-duration: 6s;
+            background: #00d9ff;
+        }
+
+        .particle:nth-child(4) {
+            left: 90%;
+            top: 75%;
+            animation-duration: 8s;
+            background: #9b00ff;
+        }
+
+        .particle:nth-child(5) {
+            left: 35%;
+            top: 90%;
+            animation-duration: 10s;
+            background: var(--yellow);
+        }
+
+        .particle:nth-child(6) {
+            left: 65%;
+            top: 10%;
+            animation-duration: 7s;
+            background: var(--red);
+        }
+
+        /* ANIMATIONS */
+
+        @keyframes madness {
+            0% {
+                transform:
+                    scale(1)
+                    rotate(0deg);
+            }
+
+            20% {
+                transform:
+                    scale(1.08)
+                    rotate(2deg);
+            }
+
+            40% {
+                transform:
+                    scale(0.94)
+                    rotate(-2deg);
+            }
+
+            60% {
+                transform:
+                    scale(1.15)
+                    rotate(1deg);
+            }
+
+            80% {
+                transform:
+                    scale(0.98)
+                    rotate(-1deg);
+            }
+
+            100% {
+                transform:
+                    scale(1)
+                    rotate(0deg);
+            }
+        }
+
+        @keyframes colorChaos {
+            from {
+                filter:
+                    hue-rotate(0deg)
+                    brightness(1);
+            }
+
+            to {
+                filter:
+                    hue-rotate(45deg)
+                    brightness(1.5);
+            }
+        }
+
+        @keyframes boardFloat {
+            0%,
+            100% {
+                transform:
+                    perspective(1200px)
+                    rotateX(3deg)
+                    translateY(0);
+            }
+
+            50% {
+                transform:
+                    perspective(1200px)
+                    rotateX(4deg)
+                    translateY(-7px);
+            }
+        }
+
+        @keyframes pieceFloat {
+            0%,
+            100% {
+                transform:
+                    translateY(0)
+                    rotate(-2deg);
+            }
+
+            50% {
+                transform:
+                    translateY(-8px)
+                    rotate(2deg);
+            }
+        }
+
+        @keyframes backgroundSpin {
+            from {
+                transform:
+                    rotate(0deg)
+                    scale(1);
+            }
+
+            to {
+                transform:
+                    rotate(360deg)
+                    scale(1);
+            }
+        }
+
+        @keyframes subtitleBlink {
+            0%,
+            100% {
+                opacity: 0.3;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform:
+                    translateY(0)
+                    scale(0.5);
+
+                opacity: 0;
+            }
+
+            20% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    translateY(-100vh)
+                    scale(1.5);
+
+                opacity: 0;
+            }
+        }
+
+        /* MOBILE */
+
+        @media (max-width: 600px) {
+
+            .board-container {
+                width: 86vw;
+                height: 86vw;
+            }
+
+            .board-frame {
+                inset: -9px;
+                border-width: 3px;
+            }
+
+            .board {
+                border-width: 3px;
+            }
+
+            .text {
+                font-size: 11vw;
+
+                -webkit-text-stroke:
+                    2px #000;
+
+                text-shadow:
+                    3px 3px 0 #000,
+                    -3px -3px 0 #000,
+                    3px -3px 0 #000,
+                    -3px 3px 0 #000;
+            }
+
+            .subtitle {
+                top:
+                    calc(50% + 30vw);
+
+                letter-spacing: 2px;
+                font-size: 8px;
+            }
+
+            .piece {
+                font-size: 30px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="background-glow"></div>
+
+    <div class="scanlines"></div>
+
+    <!-- Floating particles -->
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+
+    <!-- Chess board -->
+    <div class="board-container">
+
+        <div class="board-frame"></div>
+
+        <div
+            class="board"
+            id="board"
+        ></div>
+
+        <!-- Decorative chess pieces -->
+        <div class="piece white-piece piece-1">♜</div>
+        <div class="piece black-piece piece-2">♞</div>
+        <div class="piece black-piece piece-3">♝</div>
+        <div class="piece white-piece piece-4">♛</div>
+
+    </div>
+
+    <!-- Main text -->
+    <div class="text-wrapper">
+        <div class="text">
+            SCACCO MATTO<br>
+            <span class="yellow">PAZZO</span>
+            <span class="white"> BLARGO</span>
+        </div>
+    </div>
+
+    <!-- Very subtle subtitle -->
+    <div class="subtitle">
+        scacco matto
+    </div>
+
+    <div class="vignette"></div>
+
+    <script>
+        const board =
+            document.getElementById("board");
+
+        /*
+         * The hidden special square.
+         * 0–63 = chessboard position.
+         */
+        const specialIndex = 18;
+
+        /*
+         * Create the 64 squares.
+         */
+        for (let i = 0; i < 64; i++) {
+
+            const square =
+                document.createElement("div");
+
+            const row =
+                Math.floor(i / 8);
+
+            const column =
+                i % 8;
+
+            const isWhite =
+                (row + column) % 2 === 0;
+
+            square.className =
+                "square " +
+                (isWhite ? "white" : "black");
+
+            /*
+             * The hidden brown square.
+             */
+            if (i === specialIndex) {
+
+                square.classList.add(
+                    "special"
+                );
+
+                square.addEventListener(
+                    "click",
+                    () => {
+
+                        document.body.style.transform =
+                            "scale(1.04)";
+
+                        document.body.style.transition =
+                            "transform 0.12s ease";
+
+                        setTimeout(() => {
+
+                            window.location.href =
+                                "cacca.html";
+
+                        }, 120);
+                    }
+                );
+            }
+
+            board.appendChild(square);
+        }
+
+        /*
+         * Subtle 3D mouse movement.
+         */
+        document.addEventListener(
+            "mousemove",
+            (event) => {
+
+                const x =
+                    (event.clientX /
+                        window.innerWidth) -
+                    0.5;
+
+                const y =
+                    (event.clientY /
+                        window.innerHeight) -
+                    0.5;
+
+                const boardContainer =
+                    document.querySelector(
+                        ".board-container"
+                    );
+
+                boardContainer.style.transform =
+                    `
+                    perspective(1200px)
+                    rotateX(${3 - y * 4}deg)
+                    rotateY(${x * 4}deg)
+                    translateY(${y * -8}px)
+                    `;
+            }
+        );
+
+        /*
+         * Reset the board when the mouse leaves.
+         */
+        document.addEventListener(
+            "mouseleave",
+            () => {
+
+                const boardContainer =
+                    document.querySelector(
+                        ".board-container"
+                    );
+
+                boardContainer.style.transform =
+                    `
+                    perspective(1200px)
+                    rotateX(3deg)
+                    rotateY(0deg)
+                    translateY(0)
+                    `;
+            }
+        );
+    </script>
+
+</body>
+</html>
