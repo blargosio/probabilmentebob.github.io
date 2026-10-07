@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050508">
+<title>PROBABILMENTE BOB</title>
+
+<style>
+/* BOB FUTURE SYSTEM */
+:root {
+    --bg: #030308;
+    --panel: rgba(13, 13, 22, .82);
+    --red: #ff174f;
+    --red2: #ff003c;
+    --cyan: #00eaff;
+    --purple: #8700ff;
+    --white: #f4f4f7;
+    --muted: #777783;
+    --border: rgba(255,255,255,.1);
+}
+
+/* RESET */
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; }
+
+body {
+    margin: 0;
+    overflow: hidden;
+    color: var(--white);
+    font-family: Arial, Helvetica, sans-serif;
+    background: radial-gradient(circle at 50% 40%, #180b18 0%, #090711 40%, #030308 100%);
+}
+
+/* ANIMATED BACKGROUND */
+.background {
+    position: fixed;
+    inset: -50%;
+    background: conic-gradient(
+        from 0deg,
+        rgba(255,0,60,.14),
+        transparent 15%,
+        rgba(0,234,255,.11),
+        transparent 30%,
+        rgba(135,0,255,.14),
+        transparent 45%,
+        rgba(255,0,60,.11),
+        transparent 65%,
+        rgba(0,234,255,.1),
+        transparent 80%,
+        rgba(255,0,60,.14)
+    );
+    filter: blur(100px);
+    animation: spin 30s linear infinite;
+    pointer-events: none;
+}
+
+/* GLOW ORBS */
+.orb {
+    position: fixed;
+    width: clamp(120px, 18vw, 280px);
+    height: clamp(120px, 18vw, 280px);
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: .15;
+    pointer-events: none;
+}
+.orb.red { background: var(--red); top: 5%; left: 5%; animation: drift 9s ease-in-out infinite alternate; }
+.orb.cyan { background: var(--cyan); right: 5%; bottom: 5%; animation: drift 11s ease-in-out infinite alternate-reverse; }
+
+/* GRID */
+.grid {
+    position: fixed;
+    inset: -20%;
+    opacity: .08;
+    background-image:
+        linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);
+    background-size: 45px 45px;
+    transform: perspective(550px) rotateX(58deg) scale(1.4);
+    transform-origin: center bottom;
+    animation: gridMove 5s linear infinite;
+    pointer-events: none;
+}
+
+/* STARS */
+.stars { position: fixed; inset: 0; pointer-events: none; }
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 0 8px white;
+    animation: twinkle var(--duration) ease-in-out infinite;
+}
+
+/* TOP BAR */
+.topbar {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(760px, calc(100% - 28px));
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(5,5,10,.72);
+    backdrop-filter: blur(18px);
+    z-index: 100;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+}
+.logo { display: flex; align-items: center; gap: 7px; font-size: 9px; font-weight: 900; letter-spacing: .22em; }
+.logo-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); box-shadow: 0 0 8px var(--red), 0 0 15px var(--red); }
+.top-status { color: #555562; font-family: monospace; font-size: 8px; letter-spacing: .12em; }
+
+/* MAIN */
+main {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 18px 20px;
+    z-index: 20;
+}
+
+/* MAIN PANEL */
+.panel {
+    position: relative;
+    width: min(800px, 100%);
+    padding: clamp(20px, 4vh, 38px) clamp(20px, 4vw, 42px);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(145deg, rgba(20,20,32,.88), rgba(7,7,13,.88));
+    backdrop-filter: blur(24px);
+    box-shadow: 0 35px 100px rgba(0,0,0,.55), inset 0 1px rgba(255,255,255,.06);
+    overflow: hidden;
+}
+
+/* top neon line */
+.panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 8%;
+    width: 84%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--cyan), transparent);
+    box-shadow: 0 0 15px var(--red), 0 0 20px var(--cyan);
+}
+
+/* corner decoration */
+.panel::after {
+    content: "BOB // 001";
+    position: absolute;
+    top: 11px;
+    right: 14px;
+    color: rgba(255,255,255,.18);
+    font-family: monospace;
+    font-size: 7px;
+    letter-spacing: .15em;
+}
+
+/* TITLE */
+.title { text-align: center; margin-bottom: clamp(18px, 3vh, 28px); }
+
+.kicker {
+    margin-bottom: 7px;
+    color: var(--cyan);
+    font-family: monospace;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .4em;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(0,234,255,.7);
+}
+
+h1 {
+    margin: 0;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: clamp(42px, 7vw, 76px);
+    line-height: .78;
+    letter-spacing: -.035em;
+    text-transform: uppercase;
+    color: white;
+    text-shadow: 0 0 25px rgba(255,255,255,.08);
+}
+
+h1 span {
+    display: block;
+    color: var(--red);
+    font-size: .52em;
+    margin-top: 7px;
+    letter-spacing: .04em;
+    text-shadow: 0 0 20px rgba(255,23,79,.6);
+}
+
+.subtitle {
+    margin: 12px auto 0;
+    max-width: 450px;
+    color: var(--muted);
+    font-family: monospace;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+/* QUESTION */
+.question {
+    width: fit-content;
+    margin: 0 auto clamp(15px, 3vh, 25px);
+    padding: 7px 13px;
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 5px;
+    color: #9999a4;
+    background: rgba(255,255,255,.025);
+    font-family: monospace;
+    font-size: 8px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+/* OPTIONS */
+.options { display: grid; grid-template-columns: 1.25fr .75fr; gap: 14px; }
+
+/* CARD */
+.option {
+    position: relative;
+    min-height: clamp(170px, 25vh, 220px);
+    padding: clamp(18px, 2.5vw, 25px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255,255,255,.035);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+        transform .25s cubic-bezier(.2,1.3,.4,1),
+        border-color .25s,
+        background .25s,
+        box-shadow .25s;
+}
+.option:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,.055);
+    border-color: rgba(255,255,255,.25);
+}
+
+/* BOB CARD */
+.option.bob {
+    border-color: rgba(255,23,79,.32);
+    background: linear-gradient(135deg, rgba(255,23,79,.12), rgba(255,255,255,.025));
+    box-shadow: inset 0 0 50px rgba(255,23,79,.04);
+}
+.option.bob:hover {
+    border-color: var(--red);
+    box-shadow: 0 15px 50px rgba(255,0,60,.15), inset 0 0 50px rgba(255,23,79,.08);
+}
+
+/* cyan card */
+.option.random { border-color: rgba(0,234,255,.22); }
+.option.random:hover { border-color: var(--cyan); box-shadow: 0 15px 50px rgba(0,234,255,.1); }
+
+/* CARD LABEL */
+.number { color: rgba(255,255,255,.25); font-family: monospace; font-size: 7px; letter-spacing: .15em; }
+
+/* ICON */
+.icon {
+    margin: 12px 0 7px;
+    font-size: clamp(25px, 4vw, 38px);
+    filter: drop-shadow(0 0 12px rgba(255,255,255,.15));
+}
+
+/* CARD TEXT */
+.option h2 {
+    margin: 0;
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: clamp(20px, 3vw, 30px);
+    line-height: .9;
+    letter-spacing: -.015em;
+    text-transform: uppercase;
+}
+.option p {
+    max-width: 400px;
+    margin: 7px 0 0;
+    color: rgba(255,255,255,.4);
+    font-family: monospace;
+    font-size: 8px;
+    line-height: 1.5;
+}
+
+/* BUTTON */
+.enter {
+    align-self: flex-start;
+    margin-top: 12px;
+    padding: 7px 10px;
+    border: 1px solid rgba(255,255,255,.13);
+    border-radius: 4px;
+    background: rgba(255,255,255,.04);
+    color: rgba(255,255,255,.65);
+    font-family: monospace;
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    transition: .2s;
+}
+.option:hover .enter { color: white; background: rgba(255,255,255,.1); }
+.bob .enter { border-color: rgba(255,23,79,.4); color: var(--red); }
+.random .enter { border-color: rgba(0,234,255,.3); color: var(--cyan); }
+
+/* FOOTER */
+.footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 13px;
+    color: rgba(255,255,255,.18);
+    font-family: monospace;
+    font-size: 7px;
+    letter-spacing: .1em;
+}
+.footer strong { color: var(--red); }
+
+/* TRANSITION */
+.transition {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: linear-gradient(135deg, var(--red), var(--purple), #020207);
+    transform: scaleY(0);
+    transform-origin: bottom;
+    transition: transform .5s cubic-bezier(.7,0,.2,1);
+    pointer-events: none;
+}
+.transition.active { transform: scaleY(1); }
+
+/* VIGNETTE */
+.vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    pointer-events: none;
+    box-shadow: inset 0 0 120px rgba(0,0,0,.8);
+}
+
+/* CONNESSIONE RAGGIUNTA + REDACTED */
+.secret-link {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 200;
+    padding: 9px 14px;
+    border: 1px solid rgba(0,234,255,.45);
+    border-radius: 6px;
+    background: rgba(0,234,255,.08);
+    color: var(--cyan);
+    font-family: monospace;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .16em;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+    transition: opacity .6s, transform .6s, background .2s, box-shadow .2s;
+}
+.secret-link.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    animation: linkPulse 2s ease-in-out infinite;
+}
+.secret-link:hover { background: rgba(0,234,255,.18); }
+
+.redacted {
+    display: none;
+    width: 100%;
+    margin-top: 14px;
+    padding: 13px;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    background: #000;
+    color: var(--red);
+    font-family: monospace;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .35em;
+    cursor: pointer;
+    transition: background .2s, box-shadow .2s;
+}
+.redacted.show { display: block; animation: reveal .6s ease-out; }
+.redacted:hover { background: rgba(255,23,79,.15); box-shadow: 0 0 25px rgba(255,23,79,.35); }
+
+/* ANIMATIONS */
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes drift {
+    from { transform: translate(-20px, -10px); }
+    to { transform: translate(30px, 25px); }
+}
+@keyframes gridMove { to { background-position: 0 45px, 45px 0; } }
+@keyframes twinkle { 0%, 100% { opacity: .1; } 50% { opacity: .8; } }
+@keyframes reveal {
+    from { opacity: 0; transform: translateY(-10px) scaleX(.8); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes linkPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(0,234,255,0); }
+    50% { box-shadow: 0 0 18px rgba(0,234,255,.5); }
+}
+
+/* SHORT SCREENS (768px-high laptops) */
+@media (max-height: 720px) {
+    .topbar { top: 8px; height: 32px; }
+    main { padding-top: 45px; padding-bottom: 10px; }
+    .panel { padding: 18px 28px; }
+    .title { margin-bottom: 12px; }
+    .subtitle { margin-top: 7px; }
+    .question { margin-bottom: 12px; }
+    .option { min-height: 145px; padding: 15px; }
+    .icon { margin: 7px 0 4px; }
+    .option p { margin-top: 4px; }
+    .footer { margin-top: 8px; }
+}
+
+/* VERY SHORT SCREENS */
+@media (max-height: 600px) {
+    .topbar { display: none; }
+    main { padding: 10px; }
+    .panel { padding: 15px 22px; border-radius: 12px; }
+    .kicker { display: none; }
+    h1 { font-size: 42px; }
+    .subtitle { display: none; }
+    .question { margin: 8px auto; }
+    .option { min-height: 130px; }
+    .footer { display: none; }
+}
+
+/* MOBILE */
+@media (max-width: 650px) {
+    body { overflow: auto; }
+    main { min-height: 100%; height: auto; padding: 65px 12px 20px; }
+    .panel { width: 100%; }
+    .options { grid-template-columns: 1fr; }
+    .option { min-height: 160px; }
+    .footer { gap: 10px; flex-direction: column; }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- BACKGROUND -->
+<div class="background"></div>
+<div class="orb red"></div>
+<div class="orb cyan"></div>
+<div class="grid"></div>
+<div class="stars" id="stars"></div>
+
+<!-- TOP BAR -->
+<header class="topbar">
+    <div class="logo">
+        <span class="logo-dot"></span>
+        PROBABILMENTE BOB
+    </div>
+    <div class="top-status">
+        SYSTEM ONLINE // BOB DETECTED
+    </div>
+</header>
+
+<!-- MAIN -->
+<main>
+    <section class="panel">
+
+        <!-- TITLE -->
+        <div class="title">
+            <div class="kicker">unidentified entity // 001</div>
+            <h1>
+                PROBABILMENTE
+                <span>BOB</span>
+            </h1>
+            <div class="subtitle">
+                La probabilità che questa pagina sia stata
+                approvata da Bob è statisticamente discutibile.
+            </div>
+        </div>
+
+        <!-- QUESTION -->
+        <div class="question">SELEZIONA LA TUA DESTINAZIONE</div>
+
+        <!-- OPTIONS -->
+        <div class="options">
+
+            <!-- BOB -->
+            <article class="option bob" onclick="go('wargo.html')">
+                <div>
+                    <div class="number">DESTINAZIONE PROBABILE 1</div>
+                    <div class="icon">🗿</div>
+                    <h2>Probabilmente Bob</h2>
+                    <p>
+                        Molti pulsanti.
+                        Scegli quello giusto,
+                        oppure batti carlsen.
+                    </p>
+                </div>
+                <div class="enter">PROBABILMENTE BOB (non lo sa nessuno=</div>
+            </article>
+
+            <!-- RANDOM -->
+            <article class="option random" onclick="go('game.html')">
+                <div>
+                    <div class="number">DESTINAZIONE PROBABILE 2</div>
+                    <div class="icon">🎲</div>
+                    <h2>Random Gioco</h2>
+                    <p>
+                        Una destinazione casuale.
+                        Bob non si assume
+                        alcuna responsabilità.
+                    </p>
+                </div>
+                <div class="enter">ILLEGALE IN CLASSE (se sei leonardo va bene)</div>
+            </article>
+
+        </div>
+
+        <!-- REDACTED (appare dopo il click su CONNESSIONE RAGGIUNTA) -->
+        <button class="redacted" id="redacted" onclick="go('redacted.html')">
+            [REDACTED]
+        </button>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <span>E' BOB? <strong>PROBABILMENTE</strong></span>
+            <span>ID: BOB-001</span>
+            <span>PRESS 1 / 2</span>
+        </div>
+
+    </section>
+</main>
+
+<!-- TRANSITION -->
+<div class="transition" id="transition"></div>
+
+<!-- CONNESSIONE RAGGIUNTA (appare dopo 7 secondi) -->
+<button class="secret-link" id="secretLink">
+    CONNESSIONE RAGGIUNTA
+</button>
+
+<div class="vignette"></div>
+
+<script>
+/* NAVIGATION */
+let navigating = false;
+
+function go(url) {
+    if (navigating) return;
+    navigating = true;
+
+    document.getElementById("transition").classList.add("active");
+
+    setTimeout(() => {
+        window.location.href = url;
+    }, 500);
+}
+
+/* STARS */
+const stars = document.getElementById("stars");
+
+for (let i = 0; i < 70; i++) {
+    const star = document.createElement("div");
+    star.className = "star";
+    star.style.left = Math.random() * 100 + "%";
+    star.style.top = Math.random() * 100 + "%";
+
+    const duration = 1.5 + Math.random() * 4;
+    star.style.setProperty("--duration", duration + "s");
+    star.style.animationDelay = -(Math.random() * duration) + "s";
+
+    stars.appendChild(star);
+}
+
+/* KEYBOARD */
+document.addEventListener("keydown", event => {
+    if (event.key === "1") go("wargo.html");
+    if (event.key === "2") go("game.html");
+});
+
+/* SECRET CONNECTION */
+const secretLink = document.getElementById("secretLink");
+const redactedBtn = document.getElementById("redacted");
+
+// dopo 7 secondi appare il pulsante nell'angolo
+setTimeout(() => {
+    secretLink.classList.add("show");
+}, 7000);
+
+// al click appare [REDACTED] sotto i due bottoni principali
+secretLink.addEventListener("click", () => {
+    redactedBtn.classList.add("show");
+    secretLink.classList.remove("show");
+
+    redactedBtn.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
+</script>
+
+</body>
+</html>
